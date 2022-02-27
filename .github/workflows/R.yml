@@ -1,0 +1,51 @@
+name: R
+
+on:
+   repository_dispatch:
+       types: R
+
+jobs:
+   sj:
+       runs-on: ubuntu-latest
+       steps:
+           - name: Checkout R
+             uses: actions/checkout@v2
+             with:
+               path: main
+           - name: Setting R
+             run: |
+               cd ./main/
+               ls ${GITHUB_WORKSPACE}
+               echo ${GITHUB_WORKSPACE}
+               pwd
+               echo "main is done..."
+
+           - name: yw-r
+             uses: actions/checkout@v2
+             with:
+               repository: dsjena/yw-r
+               token: ${{ secrets.SUPER_SECRET }}
+               path: yw-r
+           - name: Setup
+             uses: actions/setup-python@v2
+             with:
+               python-version: '3.8'
+           - name: Install
+             run: |
+               cd ./yw-r/
+               python -m pip install --upgrade pip
+               pip install -r requirements.txt
+           - name: Compute R
+             run: |
+               cd ./yw-r/
+               dtt=`TZ=IST-5:30 date`
+               echo ${GITHUB_WORKSPACE}
+               echo "${dtt}" 
+               echo "${dtt}" >> recieved.md
+               bash make-rdme.sh >> log.txt 2>&1
+               sh all-run-group.sh 
+               git config --local user.email "action@github.com"
+               git config --local user.name "GitHub Action"
+               git add .
+               git diff-index --quiet HEAD || git commit -m "du" -a
+               git push
